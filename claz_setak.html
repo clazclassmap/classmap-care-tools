@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>클래즈 세특 자동생성기</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Noto Sans KR', 'Malgun Gothic', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #0066CC 0%, #0099FF 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 450px;
+            gap: 0;
+            min-height: 700px;
+        }
+        
+        .left-panel {
+            padding: 20px;
+            overflow-y: auto;
+            max-height: 800px;
+        }
+        
+        .right-panel {
+            background: #f8f9fa;
+            padding: 30px;
+            border-left: 1px solid #e0e0e0;
+            position: sticky;
+            top: 0;
+        }
+        
+        .input-section {
+            background: #E6F2FF;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #B3D9FF;
+        }
+        
+        .input-section h3 {
+            color: #0066CC;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        .input-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        
+        .input-group {
+            margin-bottom: 0;
+        }
+        
+        .input-group label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 4px;
+            color: #333;
+            font-size: 12px;
+        }
+        
+        .input-group input {
+            width: 100%;
+            padding: 6px 8px;
+            border: 1px solid #B3D9FF;
+            border-radius: 5px;
+            font-size: 13px;
+        }
+        
+        .input-group input:focus {
+            outline: none;
+            border-color: #0066CC;
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+        
+        .tab-btn {
+            padding: 8px 15px;
+            border: none;
+            background: #e9ecef;
+            color: #666;
+            cursor: pointer;
+            border-radius: 6px 6px 0 0;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .tab-btn:hover {
+            background: #dee2e6;
+        }
+        
+        .tab-btn.active {
+            background: #0066CC;
+            color: white;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .sentence-card {
+            background: #f8f9fa;
+            padding: 10px;
+            margin-bottom: 8px;
+            border-radius: 6px;
+            border-left: 3px solid #0066CC;
+            transition: all 0.3s;
+        }
+        
+        .sentence-card:hover {
+            background: #e9ecef;
+            transform: translateX(5px);
+        }
+        
+        .sentence-card label {
+            display: flex;
+            align-items: start;
+            cursor: pointer;
+        }
+        
+        .sentence-card input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            margin-right: 10px;
+            margin-top: 2px;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+        
+        .sentence-text {
+            flex: 1;
+            line-height: 1.5;
+            color: #333;
+            font-size: 14px;
+        }
+        
+        .result-section {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border: 2px solid #0066CC;
+        }
+        
+        .result-section h3 {
+            color: #0066CC;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+        
+        .result-box {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            min-height: 200px;
+            max-height: 400px;
+            overflow-y: auto;
+            line-height: 1.8;
+            font-size: 15px;
+            color: #333;
+            white-space: pre-wrap;
+        }
+        
+        .result-box.empty {
+            color: #999;
+            font-style: italic;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .char-count {
+            margin-top: 10px;
+            text-align: right;
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .char-count.warning {
+            color: #FF6B6B;
+            font-weight: bold;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: #0066CC;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #0052A3;
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            border: 2px solid #e0e0e0;
+        }
+        
+        .stat-number {
+            font-size: 28px;
+            font-weight: bold;
+            color: #0066CC;
+        }
+        
+        .stat-label {
+            font-size: 13px;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        .footer {
+            background: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .toast {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            background: #28a745;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            display: none;
+            z-index: 9999;
+            font-weight: 600;
+            font-size: 15px;
+            animation: slideIn 0.3s ease;
+        }
+        
+        .toast.show {
+            display: block;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        @media (max-width: 1200px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .right-panel {
+                position: static;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 24px;
+            }
+            
+            .left-panel, .right-panel {
+                padding: 15px;
+            }
+            
+            .input-row {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+            
+            .tabs {
+                overflow-x: auto;
+                flex-wrap: nowrap;
+            }
+            
+            .tab-btn {
+                font-size: 12px;
+                padding: 8px 12px;
+                white-space: nowrap;
+            }
+            
+            .sentence-card {
+                padding: 8px;
+            }
+            
+            .sentence-text {
+                font-size: 13px;
+            }
+            
+            .toast {
+                top: 70px;
+                right: 10px;
+                left: 10px;
+                text-align: center;
+                font-size: 14px;
+                padding: 12px 15px;
+            }
+        }
+        
+        .footer {
+            background: #f8f9fa;
+            padding: 30px 20px;
+            text-align: center;
+            border-top: 1px solid #dee2e6;
+        }
+        
+        .footer p {
+            margin: 10px 0;
+            color: #6c757d;
+            font-size: 14px;
+        }
+        
+        .footer a {
+            color: #0066CC;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        
+        .footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="toast" id="toast">✅ 클립보드에 복사되었습니다!</div>
+    
+    <div class="container">
+        <div class="header">
+            <h1>📝 클래즈 세특 자동생성기</h1>
+            <p>세부능력 및 특기사항을 쉽고 빠르게 작성하세요</p>
+        </div>
+        
+        <div class="main-content">
+            <div class="left-panel">
+                <div class="input-section">
+                    <h3>✏️ 기본 정보</h3>
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label>학생 이름</label>
+                            <input type="text" id="studentName" placeholder="예: 김민준">
+                        </div>
+                        <div class="input-group">
+                            <label>과목명</label>
+                            <input type="text" id="subjectName" placeholder="예: 국어">
+                        </div>
+                    </div>
+                </div>
+                
+                <h3 style="margin-bottom: 10px; color: #0066CC; font-size: 15px;">📌 문장 선택</h3>
+                
+                <div class="tabs">
+                    <button class="tab-btn active" onclick="switchTab('tab1')">수업참여/태도</button>
+                    <button class="tab-btn" onclick="switchTab('tab2')">학업성취/이해력</button>
+                    <button class="tab-btn" onclick="switchTab('tab3')">탐구/심화학습</button>
+                    <button class="tab-btn" onclick="switchTab('tab4')">협력/발표</button>
+                    <button class="tab-btn" onclick="switchTab('tab5')">성장/발전</button>
+                    </div>
+                
+                <div id="tab1" class="tab-content active"></div>
+                <div id="tab2" class="tab-content"></div>
+                <div id="tab3" class="tab-content"></div>
+                <div id="tab4" class="tab-content"></div>
+                <div id="tab5" class="tab-content"></div>
+                
+            </div>
+            
+            <div class="right-panel">
+                <div class="stats">
+                    <div class="stat-card">
+                        <div class="stat-number" id="selectedCount">0</div>
+                        <div class="stat-label">선택된 문장</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="charCount">0</div>
+                        <div class="stat-label">총 글자수</div>
+                    </div>
+                </div>
+                
+                <div class="result-section">
+                    <h3>📄 미리보기</h3>
+                    <div class="result-box empty" id="resultBox">
+                        문장을 선택하면 자동으로 합쳐집니다
+                    </div>
+                    <div class="char-count" id="charCountDetail">글자수: 0자</div>
+                </div>
+                
+                <div class="button-group">
+                    <button class="btn btn-primary" onclick="copyResult()">📋 복사하기</button>
+                    <button class="btn btn-secondary" onclick="resetAll()">🔄 초기화</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p><strong>© 2025 CLAZ (Classroom Analytics Zone)</strong></p>
+            <p>대표: 교육학 박사 최은영 | www.claz.kr</p>
+        </div>
+    </div>
+    
+    <script>
+        const data = {
+            "수업참여/태도": ["수업 시간에 집중력이 높고, 교사의 설명에 적극적으로 반응하며 질문과 답변에 능동적으로 참여하는 모습이 인상적이며, 다른 학생들에게도 좋은 본보기가 됨.", "학습 내용에 대한 호기심이 많아 궁금한 점을 스스로 질문하고, 수업 중 토론 활동에서 자신의 의견을 논리적이고 설득력 있게 표현하며 적극적으로 참여함.", "수업 준비를 철저히 하고, 필기와 정리를 꼼꼼히 하며, 학습 자료를 체계적으로 관리하는 성실한 학습 태도를 일관되게 보여주어 모범이 됨.", "수업에 임하는 자세가 바르고, 다른 학생들의 발표를 경청하며 배우려는 겸손한 태도로 학급의 긍정적인 학습 분위기 형성에 크게 기여함.", "어려운 내용도 포기하지 않고 끝까지 이해하려는 끈기를 보이며, 모르는 부분은 수업 후에도 질문을 통해 반드시 해결하려는 적극적인 학습 태도가 돋보임.", "수업 시간에 배운 내용을 실생활과 연결 지어 생각하며, 학습의 의미와 필요성을 스스로 찾아가는 주도적이고 성숙한 학습 태도가 잘 형성되어 있음.", "과제 제출 기한을 철저히 지키고, 수업 활동에 성실히 참여하며, 교과 학습에 대한 책임감과 자기 관리 능력이 또래에 비해 매우 높은 편임.", "💡 [소극적/적응 느린 학생] 처음에는 수업 참여에 소극적이었으나, 자신의 속도로 천천히 적응해가며 점차 수업에 몰입하는 모습을 보이고, 신중하게 사고한 후 의견을 제시하는 사려 깊은 태도를 보임.", "💡 [질문이 많은 학생] 수업 중 질문을 많이 하며 당연하게 여겨지는 내용도 깊이 이해하려는 탐구적 자세를 보이고, 표면적인 학습을 넘어 본질적인 이해를 추구하는 비판적 사고력을 지님.", "💡 [산만한/관심 분야 많은 학생] 다양한 과목에 관심을 보이며 여러 분야를 탐색하는 과정을 즐기고, 새로운 학습 주제에 대한 호기심이 왕성하여 폭넓은 지식을 쌓아가려는 의지가 돋보임.", "💡 [조용한/내향적 학생] 자신만의 학습 방식을 선호하며 개별 활동에서 높은 집중력을 발휘하고, 조용히 관찰하고 사색하는 시간을 통해 학습 내용을 깊이 내재화하는 성향을 보임.", "💡 [고집이 센/주관이 뚜렷한 학생] 수업 내용에 대해 자신만의 생각과 해석을 갖고 있으며, 교사나 교과서의 설명에 쉽게 동의하지 않고 논리적 근거를 찾으려는 독립적이고 주체적인 학습 태도를 지님."],
+            "학업성취/이해력": ["교과 내용에 대한 이해도가 높고, 핵심 개념을 정확하게 파악하여 다양한 문제 상황에 유연하게 적용하는 능력이 우수하며, 응용력이 뛰어남.", "새로운 개념을 빠르게 습득하고, 기존에 배운 지식과 유기적으로 연결하여 체계적으로 이해하며, 학습 내용을 다른 상황에 전이하는 능력이 뛰어남.", "수업 시간에 배운 내용을 바탕으로 심화 문제를 스스로 해결하며, 문제의 핵심을 파악하는 논리적 사고력과 분석력이 또래에 비해 매우 우수함.", "교과서 내용을 넘어서 관련 분야에 대한 폭넓은 배경지식을 갖추고 있으며, 이를 수업 활동과 토론에서 적절하고 효과적으로 활용함.", "복잡한 개념도 자신만의 방식으로 정리하여 명확하게 이해하고, 이를 친구들에게 쉽고 친절하게 설명해주어 또래 학습에도 긍정적인 영향을 줌.", "학습 결과물의 완성도가 높고, 내용의 정확성과 표현의 명확성이 돋보여 과제 수행 능력과 학업 성취 수준이 매우 우수함.", "💡 [느린/이해가 느린 학생] 학습 내용을 이해하는 데 시간이 필요하지만, 한번 이해한 내용은 오래 기억하며 깊이 있게 체득하는 학습 스타일을 갖고 있어 장기적으로 안정적인 학업 성취를 보임.", "💡 [편식하는/특정 과목만 잘하는 학생] 특정 과목이나 분야에서 유독 높은 관심과 집중력을 보이며, 자신이 흥미를 느끼는 영역에서는 또래를 뛰어넘는 깊이 있는 이해와 전문성을 발휘하는 잠재력을 지님.", "💡 [질문이 많은/이해 방식이 다른 학생] 개념 이해에 있어 다양한 질문을 던지며 자신만의 방식으로 소화하려 노력하고, 단순 암기보다 원리와 과정을 중시하는 학습 태도로 점진적인 성장을 이루어감.", "💡 [성적에 관심 없는/과정 중시 학생] 시험 성적보다 학습 과정 자체에 의미를 두며, 실수를 통해 배우고 성장하는 과정을 중요하게 여기는 성숙한 학습관을 형성해가고 있음.", "💡 [자기 페이스대로 하는 학생] 자신의 학습 속도와 방법을 존중하며, 다른 학생과 비교하기보다 어제의 자신과 비교하며 꾸준히 발전하려는 건강한 성장 마인드셋을 갖춤."],
+            "탐구/심화학습": ["수업 내용과 관련된 추가 자료를 스스로 찾아 읽고, 탐구 보고서 작성 시 다양한 출처를 활용하여 깊이 있고 신뢰성 높은 내용을 체계적으로 담아냄.", "교과 내용에서 더 알고 싶은 부분을 스스로 정하고, 관련 도서나 학술 자료를 찾아 학습하는 자기주도적 탐구 능력과 학문적 호기심이 매우 우수함.", "탐구 활동에서 가설을 설정하고 실험을 체계적으로 설계하며, 결과를 논리적으로 분석하고 결론을 도출하는 과학적 사고력이 잘 발달되어 있음.", "프로젝트 수행 시 주제 선정부터 자료 수집, 분석, 결론 도출까지 체계적으로 진행하며, 탐구 과정에서의 시행착오를 통해 문제 해결력을 꾸준히 기름.", "교과 내용을 실생활 문제와 연결하여 의미 있는 탐구 주제를 설정하고, 창의적이고 실현 가능한 해결 방안을 제시하는 능력이 돋보임.", "심화 학습에 대한 열의가 높아 교과 범위를 넘어선 내용도 깊은 관심을 갖고 학습하며, 새로운 지식을 탐구하려는 지적 호기심이 매우 왕성함.", "💡 [틀을 벗어나는/엉뚱한 학생] 탐구 과정에서 정해진 틀을 벗어나 자유롭게 사고하며, 기존과 다른 독창적인 접근 방법을 시도하려는 창의적 태도를 보이고 예상치 못한 결과에도 유연하게 대처함.", "💡 [산만한/여러 주제에 관심 많은 학생] 탐구 주제를 선정할 때 여러 분야를 두루 살피며, 다양한 관심사를 통해 학문 간 융합적 사고를 발달시키고 폭넓은 시각을 형성해가는 과정을 보임.", "💡 [완벽하지 않은/과정 중시 학생] 탐구 활동에서 완벽한 결과보다 과정에서의 배움을 중시하며, 실패를 두려워하지 않고 시행착오를 성장의 기회로 삼는 긍정적 탐구 태도를 지님.", "💡 [느린/깊이 파는 학생] 자신만의 속도로 깊이 있게 탐구하는 것을 선호하며, 표면적 이해를 넘어 본질을 파고드는 집중력과 끈기를 보이고 한 주제를 오래 천착하는 몰입력을 지님.", "💡 [틀에 안 맞는/독특한 표현 선호 학생] 탐구 결과를 다양한 방식으로 표현하려 시도하며, 전통적인 보고서 형식을 넘어 자신만의 독특한 방법으로 연구 결과를 정리하고 공유하려는 창의성을 발휘함."],
+            "협력/발표": ["모둠 활동에서 적극적으로 의견을 제시하고, 다른 모둠원의 생각을 존중하며 협력하여 과제를 완성하는 모습이 돋보이며, 팀워크 향상에 크게 기여함.", "발표 시 자신감 있는 태도로 청중과 눈을 맞추며, 핵심 내용을 명확하고 논리적으로 전달하고 질문에도 근거를 들어 설득력 있게 답변함.", "모둠 활동에서 리더 역할을 맡아 구성원들의 역할을 합리적으로 조율하고, 모두가 참여할 수 있도록 배려하며 이끄는 리더십이 있음.", "토론 활동에서 상대방의 의견을 경청하고, 다양한 근거를 들어 자신의 주장을 펼치며, 건설적이고 생산적인 토론 문화 형성에 기여함.", "협동 학습 시 맡은 역할을 책임감 있게 수행하고, 어려움을 겪는 모둠원을 적극적으로 도와 함께 성장하려는 협력적 태도를 꾸준히 보임.", "발표 자료를 시각적으로 효과적이고 창의적으로 구성하고, 내용을 체계적으로 전달하여 청중의 이해를 돕고 집중을 이끌어내는 능력이 우수함.", "💡 [소극적/지원 역할 선호 학생] 모둠 활동에서 리더 역할보다 지원 역할을 선호하며, 조용히 자신의 몫을 성실히 수행하고 필요한 순간에 적절한 도움을 제공하는 신뢰할 수 있는 협력자임.", "💡 [발표 싫어하는/내향적 학생] 발표보다 글로 생각을 정리하는 것을 선호하지만, 준비된 내용에 대해서는 차분하고 신중하게 전달하며, 깊이 있는 내용을 체계적으로 발표하는 능력을 지님.", "💡 [의견 충돌 잦은/논리적 학생] 모둠 활동에서 의견 충돌이 생겼을 때 감정적으로 대응하기보다, 논리적 근거를 중시하며 공정하고 합리적인 해결책을 모색하는 객관적 태도를 보임.", "💡 [말이 느린/신중한 학생] 자신의 의견을 즉시 표현하기보다 충분히 생각한 후 발언하며, 신중하고 사려 깊은 의견 제시로 모둠 활동의 질을 높이는 데 기여함.", "💡 [대규모 활동 불편한 학생] 대규모 발표보다 소규모 토론에서 더 편안함을 느끼며, 친밀한 분위기에서 깊이 있는 대화와 의견 교환을 통해 협력의 진정한 가치를 실현함."],
+            "성장/발전": ["학기 초에 비해 수업 참여도가 눈에 띄게 향상되었으며, 학습에 대한 자신감과 흥미가 크게 증가하여 수업 분위기에도 긍정적인 영향을 줌.", "처음에는 발표를 어려워했으나, 꾸준한 연습과 노력으로 자신감을 갖게 되었고, 이제는 누구보다 적극적으로 발표에 참여하며 성장한 모습을 보임.", "학습 방법을 스스로 점검하고 개선하며 효율적인 공부 습관을 형성하였고, 그 결과 학업 성취도가 꾸준히 상승하는 긍정적인 변화를 보임.", "교과에 대한 관심이 점차 깊어지면서 관련 분야의 진로를 구체적으로 탐색하기 시작하였고, 학습에 대한 목표 의식이 뚜렷해짐.", "어려운 내용 앞에서 포기하지 않고 끈기 있게 도전하는 자세가 생겼으며, 실패를 학습의 기회로 삼는 성장 마인드셋을 갖추게 됨.", "자기 주도적으로 학습 계획을 세우고 실천하는 습관이 형성되었으며, 학습에 대한 책임감과 자기 관리 능력이 한 학기 동안 크게 성장함.", "💡 [시행착오 많은 학생] 자신만의 학습 리듬을 찾아가는 과정에서 다양한 시행착오를 겪었으나, 이를 통해 자신에게 맞는 학습 방법을 발견하고 점진적으로 발전하는 모습을 보임.", "💡 [느린/꾸준한 학생] 빠른 변화보다 안정적인 성장을 추구하며, 조급해하지 않고 자신의 속도로 꾸준히 발전하는 성숙한 태도를 보이고, 장기적 관점에서 학습을 바라봄.", "💡 [의욕 없어 보이는 학생] 때로는 의욕이 낮아 보이기도 하나, 자신이 관심 있는 분야에서는 놀라운 집중력과 열정을 보이며, 내적 동기가 형성되면 폭발적인 성장 가능성을 지님.", "💡 [어려움 많이 겪은 학생] 학기 중 여러 어려움에 직면했으나 포기하지 않고 자신만의 방식으로 극복하며, 역경을 통해 더욱 단단해지는 회복탄력성을 키워감.", "💡 [결과보다 과정 중시 학생] 성적이나 결과보다 과정에서의 배움과 경험을 중시하는 가치관을 형성하며, 진정한 배움의 의미를 찾아가는 성숙한 성장 과정을 보여줌."]
+        };
+        
+        let checkboxCounter = 0;
+        
+        // 탭 내용 생성
+        Object.keys(data).forEach((category, index) => {
+            const tabId = `tab${index + 1}`;
+            const tabContent = document.getElementById(tabId);
+            
+            data[category].forEach((sentence, sIndex) => {
+                checkboxCounter++;
+                const card = document.createElement('div');
+                card.className = 'sentence-card';
+                card.innerHTML = `
+                    <label>
+                        <input type="checkbox" id="cb${checkboxCounter}" onchange="updateResult()">
+                        <span class="sentence-text">${sentence}</span>
+                    </label>
+                `;
+                tabContent.appendChild(card);
+            });
+        });
+        
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById(tabId).classList.add('active');
+        }
+        
+        function updateResult() {
+            const studentName = document.getElementById('studentName').value || '[학생이름]';
+            const subjectName = document.getElementById('subjectName').value || '[과목명]';
+            const selectedSentences = [];
+            
+            document.querySelectorAll('input[type="checkbox"]:checked').forEach(cb => {
+                let sentenceText = cb.parentElement.querySelector('.sentence-text').textContent;
+                // 💡 [학생 특징] 힌트 제거 (미리보기에서만)
+                sentenceText = sentenceText.replace(/^💡 \[.*?\] /, '');
+                selectedSentences.push(sentenceText);
+            });
+            
+            const result = selectedSentences.join(' ');
+            const resultBox = document.getElementById('resultBox');
+            
+            if (result) {
+                resultBox.textContent = result;
+                resultBox.classList.remove('empty');
+            } else {
+                resultBox.textContent = '문장을 선택하면 자동으로 합쳐집니다';
+                resultBox.classList.add('empty');
+            }
+            
+            const charCount = result.length;
+            document.getElementById('selectedCount').textContent = selectedSentences.length;
+            document.getElementById('charCount').textContent = charCount;
+            document.getElementById('charCountDetail').textContent = `글자수: ${charCount}자`;
+            
+            if (charCount > 500) {
+                document.getElementById('charCountDetail').classList.add('warning');
+            } else {
+                document.getElementById('charCountDetail').classList.remove('warning');
+            }
+        }
+        
+        function copyResult() {
+            const resultBox = document.getElementById('resultBox');
+            const text = resultBox.textContent;
+            
+            console.log('복사 버튼 클릭됨');
+            console.log('복사할 텍스트:', text);
+            
+            if (text && !resultBox.classList.contains('empty')) {
+                navigator.clipboard.writeText(text).then(() => {
+                    console.log('클립보드 복사 성공');
+                    showToast('✅ 클립보드에 복사되었습니다!');
+                }).catch(err => {
+                    console.error('클립보드 복사 실패:', err);
+                    alert('복사되었습니다!');
+                });
+            } else {
+                console.log('복사할 내용 없음');
+                alert('복사할 내용이 없습니다!');
+            }
+        }
+        
+        function resetAll() {
+            console.log('초기화 시작');
+            
+            // 모든 체크박스 해제
+            const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+            console.log('체크박스 개수:', checkboxes.length);
+            checkboxes.forEach(cb => {
+                cb.checked = false;
+            });
+            
+            // 입력 필드 초기화
+            const studentInput = document.getElementById('studentName');
+            const subjectInput = document.getElementById('subjectName');
+            
+            if (studentInput) {
+                studentInput.value = '';
+                console.log('학생 이름 초기화 완료');
+            }
+            if (subjectInput) {
+                subjectInput.value = '';
+                console.log('과목명 초기화 완료');
+            }
+            
+            // 결과 업데이트
+            updateResult();
+            console.log('초기화 완료');
+            
+            // 알림 표시
+            showToast('초기화되었습니다', '#6c757d');
+        }
+        
+        function showToast(message, color) {
+            console.log('showToast 호출됨:', message, color);
+            const toast = document.getElementById('toast');
+            
+            if (!toast) {
+                console.error('토스트 요소를 찾을 수 없습니다');
+                return;
+            }
+            
+            if (message) {
+                toast.textContent = message;
+            } else {
+                toast.textContent = '✅ 클립보드에 복사되었습니다!';
+            }
+            
+            if (color) {
+                toast.style.background = color;
+            } else {
+                toast.style.background = '#28a745';
+            }
+            
+            toast.classList.add('show');
+            console.log('토스트 표시됨');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+                console.log('토스트 숨김');
+                // 색상 리셋
+                toast.style.background = '#28a745';
+                toast.textContent = '✅ 클립보드에 복사되었습니다!';
+            }, 2500);
+        }
+        
+        // 함수를 window 객체에 명시적으로 할당
+        window.switchTab = switchTab;
+        window.updateResult = updateResult;
+        window.copyResult = copyResult;
+        window.resetAll = resetAll;
+        window.showToast = showToast;
+    </script>
+    
+    <div class="footer">
+        <p>더 자세한 학급운영 정보를 알고 싶다면?</p>
+        <p><a href="https://blog.naver.com/classmap/" target="_blank">📝 클래스맵 학급연구소 블로그 바로가기</a></p>
+        <p style="margin-top: 20px; font-size: 12px;">© CLAZ (Classroom Analytics Zone) | www.claz.kr | www.classmap.kr</p>
+    </div>
+</body>
+</html>
